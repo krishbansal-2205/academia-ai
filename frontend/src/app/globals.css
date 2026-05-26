@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  --background: #eeeeee;
+  --foreground: #303030;
+  --font-bricolage: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-paper: "Iowan Old Style", Georgia, serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-bricolage);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+::selection {
+  background: rgba(255, 86, 35, 0.18);
+}
