@@ -374,7 +374,7 @@ export function AppShell({
             {/* ★ Create Assignment button — orange gradient border, dark fill, sparkle icon */}
             <Link
               href="/assignments/new"
-              className="group relative flex items-center justify-center gap-2.5 rounded-full px-4 py-3 text-[13.5px] font-semibold text-white transition-all active:scale-[0.97]"
+              className="group relative flex items-center justify-center gap-2.5 rounded-full px-4 py-3 text-[13.5px] font-semibold text-[#FFFFFF] transition-all active:scale-[0.97]"
               style={{
                 background: 'linear-gradient(135deg, #2A2A2A 0%, #1C1C1E 100%)',
                 boxShadow: '0 0 0 2.5px #FF5623, 0 4px 16px rgba(255,86,35,0.25)',

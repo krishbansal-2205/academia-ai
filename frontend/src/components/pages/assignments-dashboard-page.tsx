@@ -51,7 +51,7 @@ export function AssignmentsDashboardPage() {
     >
       <div className="space-y-4">
         {/* ── Search + Filter row ── */}
-        <div className="flex w-full items-center justify-between rounded-[24px] bg-white px-2 py-2 shadow-sm">
+        <div className="flex w-full items-center justify-between rounded-[24px] bg-white px-2 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           {/* Left: Filter button */}
           <button className="flex shrink-0 items-center gap-2 pl-4 pr-3 text-[13px] font-medium text-[#777] transition hover:text-[#111]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -60,11 +60,8 @@ export function AssignmentsDashboardPage() {
             Filter By
           </button>
           
-          {/* Divider */}
-          <div className="mx-2 h-6 w-[1px] bg-[#E0E0E0] shrink-0"></div>
-          
           {/* Right: Search input (pill shaped) */}
-          <label className="flex flex-1 items-center gap-2.5 rounded-full border border-[#E8E8E8] px-4 py-2.5 transition focus-within:border-[#999]">
+          <label className="flex w-full max-w-[280px] items-center gap-2.5 rounded-full border border-[#E8E8E8] px-4 py-2.5 transition focus-within:border-[#999]">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-[#999] shrink-0">
               <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.8"/>
               <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
@@ -110,15 +107,32 @@ export function AssignmentsDashboardPage() {
         ) : null}
       </div>
 
-      {/* ── Floating "Create Assignment" FAB (Mobile & Desktop) ── */}
-      <Link
-        href="/assignments/new"
-        aria-label="Create Assignment"
-        className="fixed bottom-24 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-[#1C1C1E] px-6 py-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition hover:scale-105 active:scale-95 lg:bottom-10"
-      >
-        <span className="text-lg font-light leading-none text-white">+</span>
-        <span className="text-[13.5px] font-semibold text-white">Create Assignment</span>
-      </Link>
+      {/* ── Floating "Create Assignment" FAB (Only if assignments exist) ── */}
+      {!isListLoading && assignments.length > 0 && (
+        <>
+          {/* Mobile FAB: White circle with thick orange + */}
+          <Link
+            href="/assignments/new"
+            aria-label="Create Assignment"
+            className="fixed bottom-24 right-5 z-40 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#FFFFFF] shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition hover:scale-105 active:scale-95 lg:hidden"
+          >
+            <div className="relative h-[22px] w-[22px]">
+              <div className="absolute left-1/2 top-0 h-full w-[2.5px] -translate-x-1/2 rounded-full bg-[#FF5623]"></div>
+              <div className="absolute left-0 top-1/2 h-[2.5px] w-full -translate-y-1/2 rounded-full bg-[#FF5623]"></div>
+            </div>
+          </Link>
+
+          {/* Desktop FAB: Black pill, centered horizontally EXCLUDING the 240px sidebar */}
+          <Link
+            href="/assignments/new"
+            aria-label="Create Assignment"
+            className="fixed bottom-10 left-[calc(50%+120px)] z-40 hidden -translate-x-1/2 items-center gap-2.5 rounded-full bg-[#1C1C1E] px-6 py-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition hover:scale-105 active:scale-95 lg:flex"
+          >
+            <span className="text-lg font-light leading-none text-[#FFFFFF]">+</span>
+            <span className="text-[13.5px] font-semibold text-[#FFFFFF]">Create Assignment</span>
+          </Link>
+        </>
+      )}
     </AppShell>
   );
 }
