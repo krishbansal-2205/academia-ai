@@ -17,6 +17,7 @@ const QuestionSchema = new Schema(
     },
     marks: { type: Number, required: true },
     options: { type: [String], default: undefined },
+    answer: { type: String, required: true },
   },
   { _id: false }
 );

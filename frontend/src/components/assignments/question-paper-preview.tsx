@@ -124,9 +124,24 @@ export function QuestionPaperPreview({
       </div>
 
       {/* ── End of paper ── */}
-      <p className="mt-10 text-center text-[12px] font-semibold text-[#555]">
+      <p className="mt-10 text-center text-[12px] font-semibold text-[#555] break-after-page" style={{ pageBreakAfter: 'always' }}>
         End of Question Paper
       </p>
+
+      {/* ── Answer Key ── */}
+      <div className="mt-12 pt-8 border-t border-[#EAEAEA]">
+        <h2 className="mb-6 text-[18px] font-bold text-[#111]">
+          Answer Key:
+        </h2>
+        <div className="space-y-4 text-[13.5px] leading-relaxed text-[#222]">
+          {paper.sections.flatMap(section => section.questions).map(question => (
+            <div key={question.number} className="flex gap-2">
+              <span className="font-semibold shrink-0">{question.number}.</span>
+              <div>{question.answer}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

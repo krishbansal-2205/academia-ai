@@ -11,6 +11,7 @@ const QuestionSchema = z.object({
   difficulty: z.enum(['Easy', 'Moderate', 'Hard']),
   marks: z.number().positive(),
   options: z.array(z.string().min(1)).optional(),
+  answer: z.string().min(1),
 });
 
 const SectionSchema = z.object({

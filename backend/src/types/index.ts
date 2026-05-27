@@ -18,6 +18,7 @@ export interface IQuestion {
   difficulty: Difficulty;
   marks: number;
   options?: string[];
+  answer: string;
 }
 
 export interface ISection {

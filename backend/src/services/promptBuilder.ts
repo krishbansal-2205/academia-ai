@@ -47,7 +47,7 @@ export function buildPrompt(assignment: IAssignment): string {
     '- MCQ questions must include exactly 4 options.',
     '- Diagram questions must describe the diagram clearly in the question.',
     '- Numerical questions must contain concrete values or data where useful.',
-    '- Do not include an answer key.',
+    '- Include a concise, accurate answer for every question in the answer field.',
     '- Do not include explanations outside the schema.',
     '- General instructions should read like a real exam paper.',
     '- If the material does not specify institution or class, create tasteful generic placeholders.',
