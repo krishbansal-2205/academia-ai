@@ -345,8 +345,8 @@ export function AppShell({
         <MobilePageHeader title={mobileTitle ?? title} showBack={showBack} backHref={backHref} />
 
         <div className="flex-1 overflow-y-auto px-4 py-2" style={{ paddingBottom: '110px' }}>
-          {/* Page heading (Hidden on mobile since MobilePageHeader shows title) */}
-          <div className="mb-4 hidden lg:block">
+          {/* Page heading (Hidden on mobile since MobilePageHeader shows title, hidden on print) */}
+          <div className="mb-4 hidden lg:block print:hidden">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
               <h1 className="text-[17px] font-bold text-[#111]">{mobileTitle ?? title}</h1>
@@ -451,7 +451,7 @@ export function AppShell({
           {/* Page content */}
           <div className="flex-1 overflow-y-auto print:overflow-visible">
             {/* Desktop page heading */}
-            <div className="mb-5 ml-2">
+            <div className="mb-5 ml-2 print:hidden">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
                 <h1 className="text-[19px] font-bold text-[#111]">{title}</h1>

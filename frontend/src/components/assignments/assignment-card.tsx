@@ -62,13 +62,13 @@ export function AssignmentCard({ assignment }: { assignment: Assignment }) {
         </div>
 
         {/* Date row */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-[#888]">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-y-1 text-[12.5px] text-[#888]">
           <span>
-            <span className="font-semibold text-[#111]">Assigned on</span>{' '}
+            <span className="font-semibold text-[#111]">Assigned on :</span>{' '}
             {formatDate(assignment.createdAt)}
           </span>
           <span>
-            <span className="font-semibold text-[#111]">Due</span>{' '}
+            <span className="font-semibold text-[#111]">Due :</span>{' '}
             {formatDate(assignment.dueDate)}
           </span>
         </div>
