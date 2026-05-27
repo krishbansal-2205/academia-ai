@@ -308,7 +308,7 @@ function MobilePageHeader({ title, showBack, backHref }: {
 }) {
   return (
     <div className="flex items-center gap-3 px-5 py-4 lg:hidden print:hidden">
-      {showBack ? (
+      {showBack && (
         <Link
           href={backHref}
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E5E5E5] text-[#111] transition active:scale-95"
@@ -317,12 +317,6 @@ function MobilePageHeader({ title, showBack, backHref }: {
             <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </Link>
-      ) : (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E5E5E5] text-[#111]">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
       )}
       <span className="text-[16px] font-bold text-[#111]">{title}</span>
     </div>

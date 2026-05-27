@@ -51,32 +51,34 @@ export function AssignmentsDashboardPage() {
     >
       <div className="space-y-4">
         {/* ── Search + Filter row ── */}
-        <div className="flex w-full items-center justify-between rounded-[24px] bg-white px-2 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-          {/* Left: Filter button */}
-          <button className="flex shrink-0 items-center gap-2 pl-4 pr-3 text-[13px] font-medium text-[#777] transition hover:text-[#111]">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Filter By
-          </button>
-          
-          {/* Right: Search input (pill shaped) */}
-          <label className="flex w-full max-w-[280px] items-center gap-2.5 rounded-full border border-[#E8E8E8] px-4 py-2.5 transition focus-within:border-[#999]">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-[#999] shrink-0">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.8"/>
-              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-            <input
-              value={searchQuery}
-              onChange={(event) => {
-                if (error) clearError();
-                setSearchQuery(event.target.value);
-              }}
-              placeholder="Search Assignment"
-              className="min-w-0 flex-1 bg-transparent text-[13px] text-[#111] outline-none placeholder:text-[#BBB]"
-            />
-          </label>
-        </div>
+        {(isListLoading || assignments.length > 0) && (
+          <div className="flex w-full items-center justify-between rounded-[24px] bg-white px-2 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+            {/* Left: Filter button */}
+            <button className="flex shrink-0 items-center gap-2 pl-4 pr-3 text-[13px] font-medium text-[#777] transition hover:text-[#111]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Filter By
+            </button>
+            
+            {/* Right: Search input (pill shaped) */}
+            <label className="flex w-full max-w-[280px] items-center gap-2.5 rounded-full border border-[#E8E8E8] px-4 py-2.5 transition focus-within:border-[#999]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-[#999] shrink-0">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.8"/>
+                <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+              <input
+                value={searchQuery}
+                onChange={(event) => {
+                  if (error) clearError();
+                  setSearchQuery(event.target.value);
+                }}
+                placeholder="Search Assignment"
+                className="min-w-0 flex-1 bg-transparent text-[13px] text-[#111] outline-none placeholder:text-[#BBB]"
+              />
+            </label>
+          </div>
+        )}
 
         {/* ── Error ── */}
         {error ? (
