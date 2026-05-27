@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { getAssignment, getAssignments } from '../lib/api';
+import { deleteAssignment as apiDeleteAssignment, getAssignment, getAssignments } from '../lib/api';
 import type { Assignment } from '../lib/types';
 
 interface AssignmentsState {
@@ -14,6 +14,7 @@ interface AssignmentsState {
   fetchAssignment: (id: string) => Promise<void>;
   setCurrentAssignment: (assignment: Assignment | null) => void;
   upsertAssignment: (assignment: Assignment) => void;
+  deleteAssignment: (id: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -72,5 +73,16 @@ export const useAssignmentsStore = create<AssignmentsState>((set) => ({
         state.currentAssignment?.id === assignment.id ? assignment : state.currentAssignment,
       assignments: mergeAssignmentList(state.assignments, assignment),
     })),
+  deleteAssignment: async (id: string) => {
+    try {
+      await apiDeleteAssignment(id);
+      set((state) => ({
+        assignments: state.assignments.filter((a) => a.id !== id),
+        currentAssignment: state.currentAssignment?.id === id ? null : state.currentAssignment,
+      }));
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to delete assignment' });
+    }
+  },
   clearError: () => set({ error: null }),
 }));

@@ -16,10 +16,6 @@ interface ValidationErrors {
   questionTypes?: string;
 }
 
-function fileHint(fileName: string | null): string {
-  return fileName ?? 'Choose a PDF or text file, or drag and drop it here';
-}
-
 export function CreateAssignmentPage() {
   const router = useRouter();
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -41,37 +37,24 @@ export function CreateAssignmentPage() {
   const upsertAssignment = useAssignmentsStore((state) => state.upsertAssignment);
 
   const totals = questionTypes.reduce(
-    (summary, questionType) => ({
-      totalQuestions: summary.totalQuestions + questionType.count,
-      totalMarks: summary.totalMarks + questionType.count * questionType.marks,
+    (summary, qt) => ({
+      totalQuestions: summary.totalQuestions + qt.count,
+      totalMarks: summary.totalMarks + qt.count * qt.marks,
     }),
     { totalQuestions: 0, totalMarks: 0 }
   );
 
   const availableTypes = QUESTION_TYPE_OPTIONS.filter(
-    (option) => !questionTypes.some((questionType) => questionType.type === option.value)
+    (option) => !questionTypes.some((qt) => qt.type === option.value)
   );
 
   function validate(): boolean {
     const nextErrors: ValidationErrors = {};
-
-    if (!file) {
-      nextErrors.file = 'Upload a PDF or text file to generate a paper from source material.';
-    }
-
-    if (!dueDate) {
-      nextErrors.dueDate = 'Choose a due date.';
-    } else if (Number.isNaN(new Date(dueDate).getTime())) {
-      nextErrors.dueDate = 'Enter a valid due date.';
-    }
-
-    if (
-      questionTypes.length === 0 ||
-      questionTypes.some((questionType) => questionType.count <= 0 || questionType.marks <= 0)
-    ) {
+    if (!file) nextErrors.file = 'Upload a file to generate a paper from source material.';
+    if (!dueDate) nextErrors.dueDate = 'Choose a due date.';
+    else if (Number.isNaN(new Date(dueDate).getTime())) nextErrors.dueDate = 'Enter a valid due date.';
+    if (questionTypes.length === 0 || questionTypes.some((qt) => qt.count <= 0 || qt.marks <= 0))
       nextErrors.questionTypes = 'Question types, counts, and marks must all be positive.';
-    }
-
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   }
@@ -79,15 +62,10 @@ export function CreateAssignmentPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setSubmitError(null);
-
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     const formData = new FormData();
-    if (file) {
-      formData.append('file', file);
-    }
+    if (file) formData.append('file', file);
     formData.append('title', title);
     formData.append('subject', subject);
     formData.append('dueDate', dueDate);
@@ -101,10 +79,7 @@ export function CreateAssignmentPage() {
         const assignment = await createAssignment(formData);
         upsertAssignment(assignment);
         reset();
-
-        startTransition(() => {
-          router.push(`/assignments/${assignment.id}`);
-        });
+        startTransition(() => { router.push(`/assignments/${assignment.id}`); });
       } catch (error) {
         setSubmitError(error instanceof Error ? error.message : 'Failed to create assignment');
       }
@@ -113,7 +88,7 @@ export function CreateAssignmentPage() {
 
   return (
     <AppShell
-      activeNav="create"
+      activeNav="assignments"
       title="Create Assignment"
       subtitle="Set up a new assignment for your students."
       mobileTitle="Create Assignment"
@@ -122,153 +97,174 @@ export function CreateAssignmentPage() {
     >
       <form
         onSubmit={(event) => void handleSubmit(event)}
-        className="mx-auto w-full max-w-[810px] rounded-[32px] bg-white/50 p-4 shadow-[0_22px_52px_rgba(0,0,0,0.08)] sm:p-6 xl:p-8"
+        className="mx-auto w-full max-w-[760px]"
       >
-        <div className="space-y-8">
-          <div className="space-y-1">
-            <h2 className="font-[family-name:var(--font-bricolage)] text-[22px] font-bold tracking-[-0.05em]">
-              Assignment Details
-            </h2>
-            <p className="text-sm text-[#5E5E5ECC]">Basic information about your assignment</p>
+        {/* ── Card wrapper ── */}
+        <div className="rounded-2xl bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] sm:p-6 lg:p-8">
+
+          {/* Section header */}
+          <div className="mb-5">
+            <h2 className="text-[15px] font-bold text-[#111]">Assignment Details</h2>
+            <p className="mt-0.5 text-[12.5px] text-[#888]">Basic information about your assignment</p>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2">
-              <span className="text-sm font-bold">Assignment Title</span>
-              <input
-                value={title}
-                onChange={(event) => setField('title', event.target.value)}
-                placeholder="Optional: AI will derive this if left blank"
-                className="w-full rounded-full border border-[#DADADA] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#303030]"
-              />
-            </label>
-            <label className="space-y-2">
-              <span className="text-sm font-bold">Subject</span>
-              <input
-                value={subject}
-                onChange={(event) => setField('subject', event.target.value)}
-                placeholder="Optional: e.g. Science"
-                className="w-full rounded-full border border-[#DADADA] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#303030]"
-              />
-            </label>
-          </div>
-
-          <div className="space-y-3">
-            <div
-              onDragOver={(event) => {
-                event.preventDefault();
-                setIsDragging(true);
-              }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={(event) => {
-                event.preventDefault();
-                setIsDragging(false);
-                const droppedFile = event.dataTransfer.files?.[0] ?? null;
-                setField('file', droppedFile);
-                setErrors((current) => ({ ...current, file: undefined }));
-              }}
-              className={`rounded-[24px] border-[1.75px] border-dashed p-8 text-center transition ${
-                isDragging ? 'border-[#303030] bg-white' : 'border-black/20 bg-white'
-              }`}
-            >
-              <div className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-white text-lg shadow-sm">
-                ☁
-              </div>
-              <div className="mt-4 space-y-1">
-                <p className="font-medium text-[#303030]">{fileHint(file?.name ?? null)}</p>
-                <p className="text-sm text-[#A9A9A9]">PDF or TXT, up to 10MB</p>
-              </div>
-              <label className="mt-5 inline-flex cursor-pointer items-center rounded-full bg-[#F6F6F6] px-5 py-2 text-sm font-semibold">
-                Choose File
-                <input
-                  type="file"
-                  accept=".pdf,.txt,text/plain,application/pdf"
-                  className="hidden"
-                  onChange={(event) => {
-                    setField('file', event.target.files?.[0] ?? null);
-                    setErrors((current) => ({ ...current, file: undefined }));
-                  }}
-                />
-              </label>
-            </div>
-            <p className="text-sm text-[#30303099]">
-              Upload material that you want the AI to use as the primary source for the assessment.
-            </p>
-            {errors.file ? <p className="text-sm text-[#C53535]">{errors.file}</p> : null}
-          </div>
-
-          <label className="block space-y-2">
-            <span className="text-sm font-bold">Due Date</span>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(event) => {
-                setField('dueDate', event.target.value);
-                setErrors((current) => ({ ...current, dueDate: undefined }));
-              }}
-              className="w-full rounded-full border border-[#DADADA] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#303030]"
-            />
-            {errors.dueDate ? <p className="text-sm text-[#C53535]">{errors.dueDate}</p> : null}
-          </label>
-
-          <div className="space-y-4">
+          <div className="space-y-5">
+            {/* ── File upload ── */}
             <div className="space-y-2">
-              <h3 className="text-sm font-bold">Question Type</h3>
-              <p className="text-sm text-[#5E5E5ECC]">
-                Balance counts and marks for each section of the generated paper.
+              <div
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDragging(false);
+                  const dropped = e.dataTransfer.files?.[0] ?? null;
+                  setField('file', dropped);
+                  setErrors((c) => ({ ...c, file: undefined }));
+                }}
+                className={`flex flex-col items-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${
+                  isDragging ? 'border-[#FF5623] bg-orange-50' : 'border-[#DEDEDE] bg-[#FAFAFA]'
+                }`}
+              >
+                {/* Upload icon */}
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#555" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+
+                {/* File name or placeholder */}
+                {file ? (
+                  <div className="space-y-1">
+                    <p className="text-[13.5px] font-semibold text-[#111]">{file.name}</p>
+                    <p className="text-[12px] text-[#22C55E]">File selected ✓</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-[13.5px] font-semibold text-[#111]">
+                      Choose a file or drag &amp; drop it here
+                    </p>
+                    <p className="text-[12px] text-[#999]">JPEG, PNG, upto 10MB</p>
+                  </div>
+                )}
+
+                <label className="mt-4 cursor-pointer rounded-full border border-[#D0D0D0] bg-white px-5 py-2 text-[12.5px] font-semibold text-[#111] transition hover:bg-[#F5F5F5]">
+                  Browse Files
+                  <input
+                    type="file"
+                    accept=".pdf,.txt,.png,.jpg,.jpeg,image/*,text/plain,application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      setField('file', e.target.files?.[0] ?? null);
+                      setErrors((c) => ({ ...c, file: undefined }));
+                    }}
+                  />
+                </label>
+              </div>
+              <p className="text-[11.5px] text-[#AAA]">
+                Upload images of your preferred document/image
               </p>
+              {errors.file && <p className="text-[12px] text-[#E53935]">{errors.file}</p>}
             </div>
 
-            <QuestionTypeEditor
-              questionTypes={questionTypes}
-              onAdd={(type) => addQuestionType(type)}
-              onUpdate={updateQuestionType}
-              onRemove={removeQuestionType}
-            />
-
-            {errors.questionTypes ? <p className="text-sm text-[#C53535]">{errors.questionTypes}</p> : null}
-
-            <div className="flex flex-col items-end gap-2 text-right text-sm font-semibold">
-              <p>Total Questions: {totals.totalQuestions}</p>
-              <p>Total Marks: {totals.totalMarks}</p>
-              {availableTypes.length === 0 ? (
-                <p className="text-xs font-medium text-[#5E5E5E]">All question type options are already in use.</p>
-              ) : null}
+            {/* ── Due Date ── */}
+            <div className="space-y-1.5">
+              <label className="block text-[13px] font-semibold text-[#111]">Due Date</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={dueDate}
+                  placeholder="DD-MM-YYYY"
+                  onChange={(e) => {
+                    setField('dueDate', e.target.value);
+                    setErrors((c) => ({ ...c, dueDate: undefined }));
+                  }}
+                  className="w-full appearance-none rounded-xl border border-[#E0E0E0] bg-[#F8F8F8] px-4 py-3 pr-10 text-[13px] text-[#111] outline-none transition focus:border-[#111] placeholder:text-[#BBB]"
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[#888]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8"/>
+                    <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                  </svg>
+                </span>
+              </div>
+              {errors.dueDate && <p className="text-[12px] text-[#E53935]">{errors.dueDate}</p>}
             </div>
-          </div>
 
-          <label className="block space-y-2">
-            <span className="text-sm font-bold">Additional Information (For better output)</span>
-            <textarea
-              value={additionalInstructions}
-              onChange={(event) => setField('additionalInstructions', event.target.value)}
-              placeholder="e.g. Generate a question paper for a 3 hour exam duration with a strong focus on application-based questions."
-              className="min-h-[112px] w-full rounded-[20px] border border-dashed border-[#DADADA] bg-white/50 px-4 py-4 text-sm leading-7 outline-none transition focus:border-[#303030]"
-            />
-          </label>
+            {/* ── Question Type ── */}
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-[13px] font-bold text-[#111]">Question Type</h3>
+              </div>
+              <QuestionTypeEditor
+                questionTypes={questionTypes}
+                onAdd={(type) => addQuestionType(type)}
+                onUpdate={updateQuestionType}
+                onRemove={removeQuestionType}
+              />
+              {errors.questionTypes && (
+                <p className="text-[12px] text-[#E53935]">{errors.questionTypes}</p>
+              )}
 
-          {submitError ? (
-            <div className="rounded-[18px] border border-[#FFD7D7] bg-[#FFF1F1] px-4 py-3 text-sm text-[#A23A3A]">
-              {submitError}
+              {/* Totals */}
+              <div className="flex flex-col items-end gap-1 text-right text-[12.5px] font-semibold text-[#555]">
+                <p>Total Questions : {totals.totalQuestions}</p>
+                <p>Total Marks : {totals.totalMarks}</p>
+              </div>
             </div>
-          ) : null}
 
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#303030] shadow-[0_10px_24px_rgba(0,0,0,0.06)] transition hover:-translate-y-0.5"
-            >
-              ← Previous
-            </Link>
+            {/* ── Additional Information ── */}
+            <div className="space-y-1.5">
+              <label className="block text-[13px] font-semibold text-[#111]">
+                Additional Information (For better output)
+              </label>
+              <div className="relative">
+                <textarea
+                  value={additionalInstructions}
+                  onChange={(e) => setField('additionalInstructions', e.target.value)}
+                  placeholder="e.g Generate a question paper for 3 hour exam duration..."
+                  className="min-h-[100px] w-full resize-none rounded-xl border border-[#E0E0E0] bg-[#F8F8F8] px-4 py-3 pr-10 text-[13px] leading-relaxed text-[#111] outline-none transition focus:border-[#111] placeholder:text-[#BBB]"
+                />
+                {/* Mic icon */}
+                <span className="pointer-events-none absolute bottom-3 right-3 text-[#BBB]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" stroke="currentColor" strokeWidth="1.8"/>
+                    <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                  </svg>
+                </span>
+              </div>
+            </div>
 
-            <button
-              type="submit"
-              disabled={isPending}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#181818] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_42px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isPending ? 'Generating...' : 'Continue'}
-              <span>→</span>
-            </button>
+            {/* ── Submit error ── */}
+            {submitError && (
+              <div className="rounded-xl border border-[#FFD7D7] bg-[#FFF1F1] px-4 py-3 text-[13px] text-[#A23A3A]">
+                {submitError}
+              </div>
+            )}
+
+            {/* ── Action buttons ── */}
+            <div className="flex items-center justify-between gap-3 pt-2">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-full border border-[#E0E0E0] bg-white px-6 py-2.5 text-[13px] font-semibold text-[#111] transition hover:bg-[#F5F5F5]"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Previous
+              </Link>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="inline-flex items-center gap-2 rounded-full bg-[#1C1C1E] px-6 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#2D2D2F] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isPending ? 'Generating...' : 'Next'}
+                {!isPending && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </form>

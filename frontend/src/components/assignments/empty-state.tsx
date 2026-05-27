@@ -2,40 +2,45 @@ import Link from 'next/link';
 
 export function EmptyAssignmentsState() {
   return (
-    <div className="grid min-h-[620px] place-items-center rounded-[36px] bg-transparent px-4">
-      <div className="flex max-w-[520px] flex-col items-center gap-8 text-center">
-        <div className="relative grid h-[280px] w-[280px] place-items-center">
-          <div className="absolute inset-6 rounded-full bg-[linear-gradient(180deg,#F2F2F2_-15%,#EFEFEF_160%)]" />
-          <div className="absolute left-16 top-16 h-40 w-32 rounded-[24px] bg-white shadow-[0_26px_40px_rgba(146,146,146,0.2)]" />
-          <div className="absolute left-[110px] top-[104px] h-[116px] w-[116px] rounded-full border-[16px] border-[#E1DCEB] bg-[linear-gradient(158deg,#FFFFFF_14%,#FFADAD_122%)]" />
-          <div className="absolute left-[144px] top-[138px] grid h-[48px] w-[48px] place-items-center rounded-full bg-[#FF4040] text-3xl font-semibold text-white">
-            ×
-          </div>
-          <div className="absolute left-7 top-24 h-16 w-16 rounded-[22px] bg-[#011625]" />
-          <div className="absolute right-5 top-12 flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-[6px_4px_13px_rgba(27,119,139,0.09)]">
-            <span className="h-3 w-3 rounded-full bg-[#CCC6D9]" />
-            <span className="h-3 w-8 rounded-full bg-[#D5D5D5]" />
-          </div>
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
+      {/* Illustration — magnifying glass with X */}
+      <div className="relative h-44 w-44">
+        {/* Outer circle background */}
+        <div className="absolute inset-0 rounded-full bg-[#F0EBF8] opacity-60" />
+        {/* Document behind */}
+        <div className="absolute left-[18%] top-[12%] h-[58%] w-[44%] rounded-xl bg-white shadow-md" />
+        {/* Magnifying glass circle */}
+        <div className="absolute left-[30%] top-[22%] h-[50%] w-[50%] rounded-full border-[10px] border-[#CEC6E0] bg-[#FFF5F5]" />
+        {/* X mark */}
+        <div className="absolute left-[44%] top-[36%] flex h-8 w-8 items-center justify-center rounded-full bg-[#FF3B30] text-white font-bold text-base">
+          ✕
         </div>
-
-        <div className="space-y-3">
-          <h2 className="font-[family-name:var(--font-bricolage)] text-[26px] font-bold tracking-[-0.04em] text-[#303030]">
-            No assignments yet
-          </h2>
-          <p className="text-base leading-7 text-[#5E5E5ECC]">
-            Create your first assignment to start generating structured question papers from
-            your teaching material, complete with AI-powered sections, difficulty tags, and
-            downloadable PDFs.
-          </p>
-        </div>
-
-        <Link
-          href="/assignments/new"
-          className="rounded-full bg-[#181818] px-7 py-3 text-sm font-semibold text-white shadow-[0_22px_48px_rgba(0,0,0,0.18)] transition hover:-translate-y-0.5"
-        >
-          Create Your First Assignment
-        </Link>
+        {/* Handle */}
+        <div
+          className="absolute bottom-[15%] right-[15%] h-[28%] w-[10%] origin-top-right rounded-full bg-[#7B5EA7]"
+          style={{ transform: 'rotate(-45deg)' }}
+        />
+        {/* Sparkles */}
+        <div className="absolute left-[8%] top-[8%] text-[#B0B0C0] text-sm">✦</div>
+        <div className="absolute right-[8%] top-[20%] text-[#B0B0C0] text-xs">✦</div>
+        <div className="absolute bottom-[18%] left-[14%] text-[#B0B0C0] text-[10px]">✦</div>
       </div>
+
+      <div className="max-w-[320px] space-y-2">
+        <h2 className="text-[18px] font-bold text-[#111]">No assignments yet</h2>
+        <p className="text-[13px] leading-relaxed text-[#888]">
+          Create your first assignment to start collecting and grading student submissions.
+          You can set up rubrics, define marking criteria, and let AI assist with grading.
+        </p>
+      </div>
+
+      <Link
+        href="/assignments/new"
+        className="inline-flex items-center gap-2 rounded-full bg-[#1C1C1E] px-6 py-3 text-[13px] font-semibold text-white shadow-md transition hover:bg-[#2D2D2F]"
+      >
+        <span className="text-base leading-none">+</span>
+        Create Your First Assignment
+      </Link>
     </div>
   );
 }

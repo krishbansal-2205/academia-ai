@@ -1,75 +1,110 @@
+'use client';
+
 import Link from 'next/link';
+import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Assignment } from '../../lib/types';
+import { useAssignmentsStore } from '../../stores/use-assignments-store';
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(new Date(value));
-}
-
-function statusTone(status: Assignment['status']): string {
-  if (status === 'completed') {
-    return 'bg-[#EAF8EE] text-[#1F7A3D]';
+  try {
+    return new Intl.DateTimeFormat('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(new Date(value));
+  } catch {
+    return value;
   }
-
-  if (status === 'failed') {
-    return 'bg-[#FFECEC] text-[#C53535]';
-  }
-
-  return 'bg-[#FFF3EA] text-[#C4651A]';
 }
 
 export function AssignmentCard({ assignment }: { assignment: Assignment }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isDeleting, startDelete] = useTransition();
+  const deleteAssignment = useAssignmentsStore((state) => state.deleteAssignment);
+  const router = useRouter();
+
+  function handleDelete(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuOpen(false);
+    startDelete(async () => {
+      await deleteAssignment(assignment.id);
+    });
+  }
+
   return (
-    <Link
-      href={`/assignments/${assignment.id}`}
-      className="group flex flex-col gap-6 rounded-[28px] bg-white/80 p-6 shadow-[0_18px_44px_rgba(0,0,0,0.08)] transition hover:-translate-y-1 hover:bg-white"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <div className="inline-flex rounded-full bg-[#F6F6F6] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#5E5E5E]">
-            {assignment.subject}
-          </div>
-          <h3 className="font-[family-name:var(--font-bricolage)] text-[24px] font-bold tracking-[-0.05em] text-[#303030]">
-            {assignment.title}
+    <div className={`relative rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition ${
+      isDeleting ? 'opacity-50 pointer-events-none' : 'hover:shadow-[0_4px_16px_rgba(0,0,0,0.10)]'
+    }`}>
+      <Link href={`/assignments/${assignment.id}`} className="block p-5">
+        {/* Title + kebab row */}
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-[15px] font-bold leading-snug text-[#111]">
+            {assignment.title || 'Untitled Assignment'}
           </h3>
-        </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(assignment.status)}`}>
-          {assignment.status === 'processing' ? 'Generating' : assignment.status}
-        </span>
-      </div>
-
-      <div className="grid gap-3 text-sm text-[#5E5E5E] sm:grid-cols-2">
-        <p>
-          <span className="font-semibold text-[#303030]">Assigned on:</span> {formatDate(assignment.createdAt)}
-        </p>
-        <p>
-          <span className="font-semibold text-[#303030]">Due:</span> {formatDate(assignment.dueDate)}
-        </p>
-        <p>
-          <span className="font-semibold text-[#303030]">Questions:</span> {assignment.totalQuestions}
-        </p>
-        <p>
-          <span className="font-semibold text-[#303030]">Marks:</span> {assignment.totalMarks}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {assignment.questionTypes.map((questionType) => (
-          <span
-            key={`${assignment.id}-${questionType.type}`}
-            className="rounded-full bg-[#F0F0F0] px-3 py-1 text-xs font-medium text-[#5E5E5E]"
+          <button
+            aria-label="More options"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[#888] transition hover:bg-[#F5F5F5]"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setMenuOpen((v) => !v);
+            }}
           >
-            {questionType.type.toUpperCase()} · {questionType.count} × {questionType.marks}
-          </span>
-        ))}
-      </div>
+            {/* Vertical ellipsis ⋮ */}
+            <svg width="4" height="16" viewBox="0 0 4 18" fill="currentColor">
+              <circle cx="2" cy="2" r="2"/>
+              <circle cx="2" cy="9" r="2"/>
+              <circle cx="2" cy="16" r="2"/>
+            </svg>
+          </button>
+        </div>
 
-      <div className="text-sm font-semibold text-[#303030] transition group-hover:translate-x-1">
-        {assignment.status === 'completed' ? 'View generated paper →' : 'Track generation →'}
-      </div>
-    </Link>
+        {/* Date row */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-[#888]">
+          <span>
+            <span className="font-semibold text-[#111]">Assigned on</span>{' '}
+            {formatDate(assignment.createdAt)}
+          </span>
+          <span>
+            <span className="font-semibold text-[#111]">Due</span>{' '}
+            {formatDate(assignment.dueDate)}
+          </span>
+        </div>
+      </Link>
+
+      {/* Dropdown menu */}
+      {menuOpen && (
+        <>
+          {/* Click-away */}
+          <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+          <div className="absolute right-3 top-10 z-20 min-w-[160px] overflow-hidden rounded-xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.14)] ring-1 ring-black/5">
+            <Link
+              href={`/assignments/${assignment.id}`}
+              className="flex items-center gap-2.5 px-4 py-3 text-[13px] font-medium text-[#111] hover:bg-[#F5F5F5]"
+              onClick={() => setMenuOpen(false)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="1.8"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8"/>
+              </svg>
+              View Assignment
+            </Link>
+            <div className="mx-3 h-px bg-[#F0F0F0]" />
+            <button
+              className="flex w-full items-center gap-2.5 px-4 py-3 text-left text-[13px] font-medium text-[#E53935] hover:bg-[#FFF5F5] disabled:opacity-50"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isDeleting ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }

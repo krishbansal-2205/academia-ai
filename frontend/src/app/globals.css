@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #eeeeee;
-  --foreground: #303030;
-  --font-bricolage: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
-  --font-paper: "Iowan Old Style", Georgia, serif;
+  --background: #EBEBEB;
+  --foreground: #111111;
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-paper: "Georgia", "Times New Roman", Times, serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-sans: var(--font-sans);
 }
 
 * {
@@ -26,7 +26,9 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-bricolage);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -41,11 +43,43 @@ select {
   font: inherit;
 }
 
+/* Remove number input arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Date picker icon */
 input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 0.6;
 }
 
 ::selection {
-  background: rgba(255, 86, 35, 0.18);
+  background: rgba(255, 86, 35, 0.15);
+}
+
+/* Safe-area for iOS bottom nav */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+
+/* Print / PDF styles – ensure white background and readable fonts */
+@media print {
+  body {
+    background: white !important;
+    color: #111 !important;
+  }
+  aside, nav, header, .no-print {
+    display: none !important;
+  }
+  #question-paper-pdf {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
 }

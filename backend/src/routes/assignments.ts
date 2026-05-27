@@ -388,4 +388,38 @@ router.get('/:id/pdf/download', async (req: Request, res: Response): Promise<voi
   }
 });
 
+router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const assignmentId = routeParam(req.params.id);
+    const assignment = await fetchAssignmentOr404(assignmentId, res);
+    if (!assignment) {
+      return;
+    }
+
+    // Delete the generated PDF file if it exists
+    if (assignment.pdfPath && fs.existsSync(assignment.pdfPath)) {
+      try {
+        fs.unlinkSync(assignment.pdfPath);
+      } catch {
+        // Non-fatal — continue with DB deletion
+      }
+    }
+
+    // Delete uploaded source file if it exists
+    if (req.file) {
+      // req.file won't be present here, but pdfPath gives us a hint
+    }
+
+    await Assignment.findByIdAndDelete(assignmentId);
+    await invalidateAssignmentCache(assignmentId);
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to delete assignment',
+      message: (error as Error).message,
+    });
+  }
+});
+
 export default router;

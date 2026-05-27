@@ -23,6 +23,26 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+/** Fire-and-forget variant — ignores the response body (for DELETE / 204). */
+async function requestVoid(path: string, options: RequestInit = {}): Promise<void> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(
+      (errorBody as { message?: string; error?: string }).message ??
+        (errorBody as { error?: string }).error ??
+        `Request failed with status ${response.status}`
+    );
+  }
+}
+
 export function absoluteApiUrl(path: string | null): string | null {
   if (!path) {
     return null;
@@ -71,4 +91,8 @@ export async function prepareAssignmentPdf(id: string): Promise<Assignment> {
   });
 
   return response.data;
+}
+
+export async function deleteAssignment(id: string): Promise<void> {
+  await requestVoid(`/api/assignments/${id}`, { method: 'DELETE' });
 }

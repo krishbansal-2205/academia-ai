@@ -1,15 +1,19 @@
-import type { Assignment, Difficulty, GeneratedPaper } from '../../lib/types';
+import type { Assignment, GeneratedPaper } from '../../lib/types';
 
-function difficultyClasses(difficulty: Difficulty): string {
-  if (difficulty === 'Easy') {
-    return 'bg-[#EAF8EE] text-[#227B3E]';
-  }
-
-  if (difficulty === 'Hard') {
-    return 'bg-[#FFECEC] text-[#C53535]';
-  }
-
-  return 'bg-[#FFF4E6] text-[#B4671E]';
+/* ── Difficulty badge colours ── */
+function DifficultyBadge({ level }: { level: string }) {
+  const map: Record<string, string> = {
+    Easy:       'bg-[#E8F5E9] text-[#2E7D32]',
+    Moderate:   'bg-[#FFF3E0] text-[#E65100]',
+    Challenging:'bg-[#FFEBEE] text-[#C62828]',
+    Hard:       'bg-[#FFEBEE] text-[#C62828]',
+  };
+  const cls = map[level] ?? 'bg-[#F5F5F5] text-[#555]';
+  return (
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${cls}`}>
+      {level}
+    </span>
+  );
 }
 
 export function QuestionPaperPreview({
@@ -20,106 +24,109 @@ export function QuestionPaperPreview({
   paper: GeneratedPaper;
 }) {
   return (
-    <div className="rounded-[32px] bg-white p-5 shadow-[0_20px_48px_rgba(0,0,0,0.1)] xl:p-8">
-      <div className="mx-auto max-w-[996px] space-y-8">
-        <header className="space-y-5 border-b border-[#E8E8E8] pb-8 text-center">
-          <div className="space-y-2">
-            <h2 className="font-[family-name:var(--font-paper)] text-[28px] font-bold leading-[1.45] tracking-[-0.04em] xl:text-[36px]">
-              {paper.institutionName}
-            </h2>
-            <p className="font-[family-name:var(--font-paper)] text-lg font-semibold tracking-[-0.04em] xl:text-[22px]">
-              Subject: {paper.subject}
-            </p>
-            <p className="font-[family-name:var(--font-paper)] text-lg font-semibold tracking-[-0.04em] xl:text-[22px]">
-              Class: {paper.className}
-            </p>
-          </div>
-
-          <div className="font-[family-name:var(--font-paper)] text-xl font-bold tracking-[-0.04em] xl:text-[28px]">
-            {paper.examTitle}
-          </div>
-
-          <div className="grid gap-3 font-[family-name:var(--font-paper)] text-sm font-semibold tracking-[-0.04em] text-[#303030] sm:grid-cols-3 xl:text-lg">
-            <div>Time Allowed: {paper.duration}</div>
-            <div>Maximum Marks: {paper.totalMarks}</div>
-            <div>Due Date: {new Intl.DateTimeFormat('en-IN').format(new Date(assignment.dueDate))}</div>
-          </div>
-
-          <p className="font-[family-name:var(--font-paper)] text-left text-sm font-semibold leading-7 tracking-[-0.04em] xl:text-lg">
-            {paper.generalInstructions}
-          </p>
-        </header>
-
-        <section className="space-y-4">
-          <div className="grid gap-4 font-[family-name:var(--font-paper)] text-base font-semibold tracking-[-0.04em] text-[#303030] md:grid-cols-3 xl:text-xl">
-            <label className="space-y-2">
-              <span>Name</span>
-              <div className="border-b border-dashed border-[#B5B5B5] pb-3" />
-            </label>
-            <label className="space-y-2">
-              <span>Roll Number</span>
-              <div className="border-b border-dashed border-[#B5B5B5] pb-3" />
-            </label>
-            <label className="space-y-2">
-              <span>Section</span>
-              <div className="border-b border-dashed border-[#B5B5B5] pb-3" />
-            </label>
-          </div>
-        </section>
-
-        <section className="space-y-10">
-          {paper.sections.map((section) => (
-            <article key={section.title} className="space-y-5">
-              <div className="space-y-3 text-center">
-                <h3 className="font-[family-name:var(--font-paper)] text-2xl font-semibold tracking-[-0.04em] xl:text-[30px]">
-                  {section.title}
-                </h3>
-                <p className="font-[family-name:var(--font-paper)] text-left text-sm font-semibold leading-7 tracking-[-0.04em] xl:text-lg">
-                  {section.instruction}
-                </p>
-              </div>
-
-              <div className="space-y-5">
-                {section.questions.map((question) => (
-                  <div
-                    key={`${section.title}-${question.number}`}
-                    className="rounded-[24px] border border-[#EFEFEF] bg-[#FCFCFC] p-5"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="min-w-0 flex-1 space-y-3">
-                        <p className="font-[family-name:var(--font-paper)] text-base leading-8 tracking-[-0.04em] text-[#303030] xl:text-lg">
-                          <span className="font-semibold">{question.number}.</span> {question.text}
-                        </p>
-
-                        {question.options?.length ? (
-                          <div className="grid gap-3 font-[family-name:var(--font-paper)] text-sm leading-7 tracking-[-0.03em] text-[#303030] md:grid-cols-2 xl:text-base">
-                            {question.options.map((option) => (
-                              <div key={option} className="rounded-2xl bg-white px-4 py-3">
-                                {option}
-                              </div>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-
-                      <div className="flex shrink-0 flex-col items-end gap-3">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] ${difficultyClasses(question.difficulty)}`}
-                        >
-                          {question.difficulty}
-                        </span>
-                        <span className="rounded-full bg-[#303030] px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-white">
-                          {question.marks} Marks
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
-        </section>
+    /*
+     * This wrapper is both the screen preview and the target for html2pdf.
+     * We keep it white, A4-proportioned, and use Georgia/serif for the paper feel.
+     */
+    <div
+      id="question-paper-pdf"
+      className="mx-auto w-full max-w-[760px] rounded-2xl bg-white p-8 shadow-[0_4px_24px_rgba(0,0,0,0.08)] lg:p-10"
+      style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+    >
+      {/* ── Institution header ── */}
+      <div className="mb-6 text-center">
+        <h1 className="text-[20px] font-bold leading-snug text-[#111] lg:text-[24px]">
+          {paper.institutionName}
+        </h1>
+        <p className="mt-1 text-[14px] font-semibold text-[#333]">
+          Subject: {paper.subject}
+        </p>
+        <p className="text-[14px] font-semibold text-[#333]">
+          Class: {paper.className}
+        </p>
       </div>
+
+      {/* ── Time + Marks row ── */}
+      <div className="mb-3 flex justify-between text-[13px] font-semibold text-[#333]">
+        <span>Time Allowed: {paper.duration}</span>
+        <span>Maximum Marks: {paper.totalMarks}</span>
+      </div>
+
+      {/* ── General instructions ── */}
+      <p className="mb-5 text-[12.5px] italic text-[#555]">
+        All questions are compulsory unless stated otherwise.
+      </p>
+
+      {/* ── Student fill-in fields ── */}
+      <div className="mb-6 space-y-2 text-[13px] text-[#333]">
+        <div className="flex items-end gap-2">
+          <span className="shrink-0 font-semibold">Name:</span>
+          <div className="flex-1 border-b border-dashed border-[#AAA]" />
+        </div>
+        <div className="flex items-end gap-2">
+          <span className="shrink-0 font-semibold">Roll Number:</span>
+          <div className="flex-1 border-b border-dashed border-[#AAA]" />
+        </div>
+        <div className="flex items-end gap-2">
+          <span className="shrink-0 font-semibold">Class:</span>
+          <span className="mr-6">{paper.className}</span>
+          <span className="shrink-0 font-semibold">Section:</span>
+          <div className="flex-1 border-b border-dashed border-[#AAA]" />
+        </div>
+      </div>
+
+      {/* ── Sections & Questions ── */}
+      <div className="space-y-10">
+        {paper.sections.map((section) => (
+          <section key={section.title}>
+            {/* Section heading */}
+            <h2 className="mb-1 text-center text-[16px] font-bold text-[#111]">
+              {section.title}
+            </h2>
+            <p className="mb-1 text-[12.5px] font-semibold text-[#444]">
+              {section.instruction}
+            </p>
+            <p className="mb-4 text-[12px] italic text-[#777]">
+              {section.instruction?.includes('marks') ? '' : `Attempt all questions. Each question carries ${section.questions[0]?.marks ?? ''} marks`}
+            </p>
+
+            <ol className="space-y-3">
+              {section.questions.map((question) => (
+                <li
+                  key={`${section.title}-${question.number}`}
+                  className="text-[13.5px] leading-relaxed text-[#222]"
+                >
+                  <span className="font-semibold">{question.number}. </span>
+                  {question.text}
+                  {' '}
+                  <span className="font-semibold text-[#555]">
+                    [{question.marks} Marks]
+                  </span>
+                  {' '}
+                  {/* Difficulty badge after marks */}
+                  <DifficultyBadge level={question.difficulty} />
+
+                  {/* MCQ options */}
+                  {question.options?.length ? (
+                    <div className="mt-2 grid grid-cols-1 gap-1 pl-5 sm:grid-cols-2">
+                      {question.options.map((option, idx) => (
+                        <span key={option} className="text-[13px] text-[#444]">
+                          ({String.fromCharCode(97 + idx)}) {option}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))}
+      </div>
+
+      {/* ── End of paper ── */}
+      <p className="mt-10 text-center text-[12px] font-semibold text-[#555]">
+        End of Question Paper
+      </p>
     </div>
   );
 }
