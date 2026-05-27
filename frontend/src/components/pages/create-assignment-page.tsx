@@ -111,7 +111,7 @@ export function CreateAssignmentPage() {
           <div className="space-y-5">
             {/* ── File upload ── */}
             <div className="space-y-2">
-              <div
+              <label
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={(e) => {
@@ -121,7 +121,7 @@ export function CreateAssignmentPage() {
                   setField('file', dropped);
                   setErrors((c) => ({ ...c, file: undefined }));
                 }}
-                className={`flex flex-col items-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${
+                className={`flex flex-col items-center cursor-pointer rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${
                   isDragging ? 'border-[#FF5623] bg-orange-50' : 'border-[#DEDEDE] bg-[#FAFAFA]'
                 }`}
               >
@@ -147,19 +147,19 @@ export function CreateAssignmentPage() {
                   </div>
                 )}
 
-                <label className="mt-4 cursor-pointer rounded-full border border-[#D0D0D0] bg-white px-5 py-2 text-[12.5px] font-semibold text-[#111] transition hover:bg-[#F5F5F5]">
+                <div className="mt-4 rounded-full border border-[#D0D0D0] bg-white px-5 py-2 text-[12.5px] font-semibold text-[#111] transition hover:bg-[#F5F5F5]">
                   Browse Files
-                  <input
-                    type="file"
-                    accept=".pdf,.txt,.png,.jpg,.jpeg,image/*,text/plain,application/pdf"
-                    className="hidden"
-                    onChange={(e) => {
-                      setField('file', e.target.files?.[0] ?? null);
-                      setErrors((c) => ({ ...c, file: undefined }));
-                    }}
-                  />
-                </label>
-              </div>
+                </div>
+                <input
+                  type="file"
+                  accept=".pdf,.txt,.png,.jpg,.jpeg,image/*,text/plain,application/pdf"
+                  className="sr-only"
+                  onChange={(e) => {
+                    setField('file', e.target.files?.[0] ?? null);
+                    setErrors((c) => ({ ...c, file: undefined }));
+                  }}
+                />
+              </label>
               <p className="text-[11.5px] text-[#AAA]">
                 Upload images of your preferred document/image
               </p>
