@@ -1,18 +1,16 @@
 'use client';
 
 import { useEffect, useTransition } from 'react';
-import { absoluteApiUrl, prepareAssignmentPdf, regenerateAssignment } from '../../lib/api';
+import { regenerateAssignment } from '../../lib/api';
 import { useAssignmentSubscription } from '../../hooks/use-assignment-subscription';
 import { useAssignmentsStore } from '../../stores/use-assignments-store';
 import { QuestionPaperPreview } from '../assignments/question-paper-preview';
 import { AppShell } from '../shell/app-shell';
 
-function outputMessage(status: string, pdfStatus: string): string {
+function outputMessage(status: string): string {
   if (status === 'processing') return 'Your question paper is being generated from the uploaded material.';
   if (status === 'failed') return 'Generation did not complete. You can retry with the same settings.';
-  if (pdfStatus === 'processing') return 'Question paper is ready. The PDF is being prepared.';
-  if (pdfStatus === 'failed') return 'Question paper is ready, but the PDF export needs another attempt.';
-  return 'Certainly, Lakshya! Here are customized Question Paper for your CBSE Grade 8 Science classes on the NCERT chapters:';
+  return 'Certainly! Here is your customized Question Paper:';
 }
 
 export function AssignmentOutputPage({ assignmentId }: { assignmentId: string }) {
@@ -45,20 +43,11 @@ export function AssignmentOutputPage({ assignmentId }: { assignmentId: string })
     });
   }
 
-  async function handleDownload(): Promise<void> {
-    if (assignment?.pdfDownloadUrl) {
-      const url = absoluteApiUrl(assignment.pdfDownloadUrl);
-      if (url) window.location.href = url;
-      return;
-    }
-    startPdfPreparation(async () => {
-      const next = await prepareAssignmentPdf(assignmentId);
-      upsertAssignment(next);
-    });
+  function handleDownload(): void {
+    window.print();
   }
 
   const status = assignment?.status ?? 'processing';
-  const pdfStatus = assignment?.pdfStatus ?? 'idle';
 
   return (
     <AppShell
@@ -71,7 +60,7 @@ export function AssignmentOutputPage({ assignmentId }: { assignmentId: string })
     >
       <div className="space-y-5">
         {/* ── Status / action banner ── */}
-        <section className={`rounded-2xl p-5 ${
+        <section className={`rounded-2xl p-5 print:hidden ${
           status === 'failed'
             ? 'bg-[#FFF1F1] text-[#A23A3A]'
             : status === 'processing'
@@ -80,24 +69,19 @@ export function AssignmentOutputPage({ assignmentId }: { assignmentId: string })
         }`}>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <p className="text-[13.5px] leading-relaxed lg:text-[14px]">
-              {outputMessage(status, pdfStatus)}
+              {outputMessage(status)}
             </p>
-            <div className="flex shrink-0 flex-wrap gap-3">
+            <div className="flex shrink-0 flex-wrap gap-3 print:hidden">
               <button
                 type="button"
-                onClick={() => void handleDownload()}
-                disabled={!assignment || isPreparingPdf || status === 'processing'}
+                onClick={handleDownload}
+                disabled={!assignment || status === 'processing'}
                 className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[13px] font-semibold text-[#111] transition hover:bg-[#F5F5F5] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {/* Download icon */}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
                   <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                {assignment?.pdfDownloadUrl
-                  ? 'Download as PDF'
-                  : isPreparingPdf || pdfStatus === 'processing'
-                    ? 'Preparing PDF...'
-                    : 'Download as PDF'}
+                Download as PDF
               </button>
               <button
                 type="button"

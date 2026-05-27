@@ -51,16 +51,24 @@ export function AssignmentsDashboardPage() {
     >
       <div className="space-y-4">
         {/* ── Search + Filter row ── */}
-        <div className="flex items-center gap-2">
-          {/* Search input — full width on mobile, flex-1 on desktop */}
-          <div className="relative flex flex-1 items-center">
-            {/* Search icon */}
-            <span className="pointer-events-none absolute left-3.5 flex items-center text-[#999]">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.8"/>
-                <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              </svg>
-            </span>
+        <div className="flex w-full items-center justify-between rounded-[24px] bg-white px-2 py-2 shadow-sm">
+          {/* Left: Filter button */}
+          <button className="flex shrink-0 items-center gap-2 pl-4 pr-3 text-[13px] font-medium text-[#777] transition hover:text-[#111]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Filter By
+          </button>
+          
+          {/* Divider */}
+          <div className="mx-2 h-6 w-[1px] bg-[#E0E0E0] shrink-0"></div>
+          
+          {/* Right: Search input (pill shaped) */}
+          <label className="flex flex-1 items-center gap-2.5 rounded-full border border-[#E8E8E8] px-4 py-2.5 transition focus-within:border-[#999]">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" className="text-[#999] shrink-0">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.8"/>
+              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
             <input
               value={searchQuery}
               onChange={(event) => {
@@ -68,17 +76,9 @@ export function AssignmentsDashboardPage() {
                 setSearchQuery(event.target.value);
               }}
               placeholder="Search Assignment"
-              className="w-full rounded-full border border-[#E0E0E0] bg-white py-2.5 pl-10 pr-4 text-[13px] text-[#111] shadow-sm outline-none transition focus:border-[#999] placeholder:text-[#BBB]"
+              className="min-w-0 flex-1 bg-transparent text-[13px] text-[#111] outline-none placeholder:text-[#BBB]"
             />
-          </div>
-
-          {/* Filter button — pill */}
-          <button className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#E0E0E0] bg-white px-4 py-2.5 text-[13px] font-medium text-[#555] shadow-sm transition hover:bg-[#F5F5F5]">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span className="hidden sm:inline">Filter By</span>
-          </button>
+          </label>
         </div>
 
         {/* ── Error ── */}
@@ -110,14 +110,14 @@ export function AssignmentsDashboardPage() {
         ) : null}
       </div>
 
-      {/* ── Mobile FAB: clean orange circle with + ── */}
+      {/* ── Floating "Create Assignment" FAB (Mobile & Desktop) ── */}
       <Link
         href="/assignments/new"
         aria-label="Create Assignment"
-        className="fixed bottom-24 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.18)] transition hover:scale-105 active:scale-95 lg:hidden"
-        style={{ boxShadow: '0 0 0 2px #FF5623, 0 6px 20px rgba(255,86,35,0.25)' }}
+        className="fixed bottom-24 left-1/2 z-40 flex -translate-x-1/2 items-center gap-2.5 rounded-full bg-[#1C1C1E] px-6 py-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.3)] transition hover:scale-105 active:scale-95 lg:bottom-10"
       >
-        <span className="text-3xl font-light leading-none text-[#FF5623]">+</span>
+        <span className="text-lg font-light leading-none text-white">+</span>
+        <span className="text-[13.5px] font-semibold text-white">Create Assignment</span>
       </Link>
     </AppShell>
   );

@@ -335,10 +335,10 @@ export function AppShell({
   children,
 }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-[#EBEBEB]">
+    <div className="flex h-screen w-full flex-col bg-[#EBEBEB] overflow-hidden print:h-auto print:bg-white print:overflow-visible">
 
       {/* ══ MOBILE LAYOUT (< lg) ══════════════════════ */}
-      <div className="flex min-h-screen flex-col lg:hidden">
+      <div className="flex flex-1 flex-col overflow-hidden lg:hidden print:hidden">
         <MobileHeader />
         <MobilePageHeader title={mobileTitle ?? title} showBack={showBack} backHref={backHref} />
 
@@ -359,10 +359,10 @@ export function AppShell({
       </div>
 
       {/* ══ DESKTOP LAYOUT (≥ lg) ════════════════════ */}
-      <div className="hidden min-h-screen lg:flex">
+      <div className="hidden flex-1 lg:flex overflow-hidden print:flex print:overflow-visible">
 
         {/* ── Sidebar ── */}
-        <aside className="flex w-[240px] shrink-0 flex-col justify-between bg-white px-4 py-6 shadow-[2px_0_8px_rgba(0,0,0,0.05)]">
+        <aside className="flex w-[240px] shrink-0 flex-col justify-between bg-white px-4 py-6 shadow-[2px_0_8px_rgba(0,0,0,0.05)] overflow-y-auto print:hidden">
           <div className="flex flex-col gap-7">
 
             {/* Logo */}
@@ -414,7 +414,7 @@ export function AppShell({
         <div className="flex flex-1 flex-col overflow-hidden">
 
           {/* Top bar */}
-          <div className="flex items-center justify-between bg-white px-6 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between bg-white px-6 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)] print:hidden">
             <div className="flex items-center gap-3">
               {showBack && (
                 <Link
