@@ -36,10 +36,11 @@ export function EmptyAssignmentsState() {
 
       <Link
         href="/assignments/new"
-        className="inline-flex items-center gap-2 rounded-full bg-[#1C1C1E] px-6 py-3 text-[13px] font-semibold text-[#FFFFFF] shadow-md transition hover:bg-[#2D2D2F]"
+        className="inline-flex items-center gap-2 rounded-full bg-[#1C1C1E] px-6 py-3 text-[13px] font-semibold shadow-md transition hover:bg-[#2D2D2F]"
+        style={{ color: '#FFFFFF' }}
       >
-        <span className="text-base leading-none">+</span>
-        Create Your First Assignment
+        <span className="text-base leading-none text-[#FFFFFF]" style={{ color: '#FFFFFF' }}>+</span>
+        <span style={{ color: '#FFFFFF' }}>Create Your First Assignment</span>
       </Link>
     </div>
   );

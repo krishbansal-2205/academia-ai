@@ -277,24 +277,26 @@ function MobileTabBar({ activeNav }: { activeNav: NavKey }) {
 ───────────────────────────────────────── */
 function MobileHeader() {
   return (
-    <header className="flex items-center justify-between border-b border-[#E8E8E8] bg-white px-4 py-3 lg:hidden">
-      <div className="flex items-center gap-2.5">
-        <AppIcon />
-        <span className="text-[18px] font-bold tracking-tight text-[#111]">VedaAI</span>
-      </div>
+    <div className="p-3 pb-0 lg:hidden print:hidden">
+      <header className="flex items-center justify-between rounded-[24px] bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <AppIcon />
+          <span className="text-[18px] font-bold tracking-tight text-[#111]">VedaAI</span>
+        </div>
       <div className="flex items-center gap-2">
         <BellButton />
         <div className="h-8 w-8 overflow-hidden rounded-full bg-[#E0D6F0]">
           <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-[#6B4E9E]">JD</div>
         </div>
-        {/* Hamburger */}
-        <button className="flex h-9 w-9 items-center justify-center">
-          <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
-            <path d="M1 1h18M1 7h18M1 13h18" stroke="#111" strokeWidth="1.8" strokeLinecap="round"/>
-          </svg>
-        </button>
-      </div>
-    </header>
+          {/* Hamburger */}
+          <button className="flex h-9 w-9 items-center justify-center">
+            <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+              <path d="M1 1h18M1 7h18M1 13h18" stroke="#111" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+    </div>
   );
 }
 
@@ -305,18 +307,24 @@ function MobilePageHeader({ title, showBack, backHref }: {
   title: string; showBack: boolean; backHref: string;
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-[#E8E8E8] bg-white px-4 py-3 lg:hidden">
-      {showBack && (
+    <div className="flex items-center gap-3 px-5 py-4 lg:hidden print:hidden">
+      {showBack ? (
         <Link
           href={backHref}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F5F5F5] text-[#111]"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E5E5E5] text-[#111] transition active:scale-95"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
             <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </Link>
+      ) : (
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E5E5E5] text-[#111]">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
       )}
-      <span className="text-[15px] font-semibold text-[#111]">{title}</span>
+      <span className="text-[16px] font-bold text-[#111]">{title}</span>
     </div>
   );
 }
@@ -342,9 +350,9 @@ export function AppShell({
         <MobileHeader />
         <MobilePageHeader title={mobileTitle ?? title} showBack={showBack} backHref={backHref} />
 
-        <div className="flex-1 overflow-y-auto px-4 py-4" style={{ paddingBottom: '110px' }}>
-          {/* Page heading */}
-          <div className="mb-4">
+        <div className="flex-1 overflow-y-auto px-4 py-2" style={{ paddingBottom: '110px' }}>
+          {/* Page heading (Hidden on mobile since MobilePageHeader shows title) */}
+          <div className="mb-4 hidden lg:block">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
               <h1 className="text-[17px] font-bold text-[#111]">{mobileTitle ?? title}</h1>
@@ -359,10 +367,10 @@ export function AppShell({
       </div>
 
       {/* ══ DESKTOP LAYOUT (≥ lg) ════════════════════ */}
-      <div className="hidden flex-1 lg:flex overflow-hidden print:flex print:overflow-visible">
+      <div className="hidden flex-1 lg:flex overflow-hidden p-4 gap-4 print:flex print:overflow-visible print:p-0 print:gap-0">
 
         {/* ── Sidebar ── */}
-        <aside className="flex w-[240px] shrink-0 flex-col justify-between bg-white px-4 py-6 shadow-[2px_0_8px_rgba(0,0,0,0.05)] overflow-y-auto print:hidden">
+        <aside className="flex w-[240px] shrink-0 flex-col justify-between rounded-[24px] bg-white px-4 py-6 shadow-sm overflow-y-auto print:hidden">
           <div className="flex flex-col gap-7">
 
             {/* Logo */}
@@ -374,10 +382,11 @@ export function AppShell({
             {/* ★ Create Assignment button — orange gradient border, dark fill, sparkle icon */}
             <Link
               href="/assignments/new"
-              className="group relative flex items-center justify-center gap-2.5 rounded-full px-4 py-3 text-[13.5px] font-semibold text-[#FFFFFF] transition-all active:scale-[0.97]"
+              className="group relative flex items-center justify-center gap-2.5 rounded-full px-4 py-3 text-[13.5px] font-semibold transition-all active:scale-[0.97]"
               style={{
                 background: 'linear-gradient(135deg, #2A2A2A 0%, #1C1C1E 100%)',
                 boxShadow: '0 0 0 2.5px #FF5623, 0 4px 16px rgba(255,86,35,0.25)',
+                color: '#FFFFFF'
               }}
             >
               <SparkleIcon size={16} color="white" />
@@ -411,10 +420,10 @@ export function AppShell({
         </aside>
 
         {/* ── Main content ── */}
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden gap-4">
 
           {/* Top bar */}
-          <div className="flex items-center justify-between bg-white px-6 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)] print:hidden">
+          <div className="flex shrink-0 items-center justify-between rounded-[24px] bg-white px-6 py-3 shadow-sm print:hidden">
             <div className="flex items-center gap-3">
               {showBack && (
                 <Link
@@ -446,17 +455,17 @@ export function AppShell({
           </div>
 
           {/* Page content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <header className="mb-6 flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
-                  <h1 className="text-[22px] font-bold text-[#111]">{title}</h1>
-                </div>
-                {subtitle && <p className="mt-0.5 pl-4 text-[13px] text-[#888]">{subtitle}</p>}
+          <div className="flex-1 overflow-y-auto print:overflow-visible">
+            {/* Desktop page heading */}
+            <div className="mb-5 ml-2">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
+                <h1 className="text-[19px] font-bold text-[#111]">{title}</h1>
               </div>
-              {topAction && <div className="shrink-0">{topAction}</div>}
-            </header>
+              {subtitle && <p className="mt-1 pl-4 text-[13px] text-[#888]">{subtitle}</p>}
+            </div>
+
+            {topAction && <div className="mb-4">{topAction}</div>}
             <main>{children}</main>
           </div>
         </div>
