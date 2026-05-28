@@ -405,26 +405,28 @@ export function AppShell({
           </div>
 
           {/* Bottom: Settings + school card */}
-          <div className="flex flex-col gap-3">
-            <button 
-              onClick={() => {
-                if (isLoaded && userId) openUserProfile();
-              }}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium text-[#6B6B6B] hover:bg-[#F5F5F5] hover:text-[#111]"
-            >
-              <IconSettings />
-              Settings
-            </button>
-            <div className="flex items-center gap-3 rounded-2xl bg-[#F5F5F5] p-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-[#FFDAB0] to-[#F0A87A] text-sm font-bold text-[#7A3A1E]">
-                DP
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-[13px] font-semibold text-[#111]">Delhi Public School</p>
-                <p className="truncate text-[11px] text-[#888]">Bokaro Steel City</p>
+          {isLoaded && userId && (
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => {
+                  if (isLoaded && userId) openUserProfile();
+                }}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium text-[#6B6B6B] hover:bg-[#F5F5F5] hover:text-[#111]"
+              >
+                <IconSettings />
+                Settings
+              </button>
+              <div className="flex items-center gap-3 rounded-2xl bg-[#F5F5F5] p-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-[#FFDAB0] to-[#F0A87A] text-sm font-bold text-[#7A3A1E]">
+                  DP
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-semibold text-[#111]">Delhi Public School</p>
+                  <p className="truncate text-[11px] text-[#888]">Bokaro Steel City</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </aside>
 
         {/* ── Main content ── */}
