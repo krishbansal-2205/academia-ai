@@ -6,6 +6,7 @@ import { AssignmentCard } from '../assignments/assignment-card';
 import { EmptyAssignmentsState } from '../assignments/empty-state';
 import { AppShell } from '../shell/app-shell';
 import { useAssignmentsStore } from '../../stores/use-assignments-store';
+import { useAuth } from '@clerk/nextjs';
 
 function DashboardSkeleton() {
   return (
@@ -26,12 +27,21 @@ export function AssignmentsDashboardPage() {
   const error = useAssignmentsStore((state) => state.error);
   const fetchAssignments = useAssignmentsStore((state) => state.fetchAssignments);
   const clearError = useAssignmentsStore((state) => state.clearError);
+  const clearAssignments = useAssignmentsStore((state) => state.clearAssignments);
+  const { isLoaded, userId } = useAuth();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   useEffect(() => {
-    void fetchAssignments();
-  }, [fetchAssignments]);
+    if (isLoaded) {
+      if (userId) {
+        void fetchAssignments();
+      } else {
+        clearAssignments();
+      }
+    }
+  }, [isLoaded, userId, fetchAssignments, clearAssignments]);
 
   const normalizedQuery = deferredSearchQuery.trim().toLowerCase();
   const filteredAssignments = normalizedQuery
@@ -81,7 +91,7 @@ export function AssignmentsDashboardPage() {
         )}
 
         {/* ── Error ── */}
-        {error ? (
+        {error && userId ? (
           <div className="rounded-2xl border border-[#FFD7D7] bg-[#FFF1F1] px-4 py-3 text-[13px] text-[#A23A3A]">
             {error}
           </div>

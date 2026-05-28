@@ -2,7 +2,7 @@
 
 import React, { type ReactNode } from 'react';
 import Link from 'next/link';
-import { useAuth, SignInButton, UserButton } from '@clerk/nextjs';
+import { useAuth, useClerk, SignInButton, UserButton } from '@clerk/nextjs';
 
 export type NavKey = 'home' | 'groups' | 'assignments' | 'toolkit' | 'library';
 
@@ -343,6 +343,7 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const { isLoaded, userId } = useAuth();
+  const { openUserProfile } = useClerk();
 
   return (
     <div className="flex h-screen w-full flex-col bg-[#EBEBEB] overflow-hidden print:h-auto print:bg-white print:overflow-visible">
@@ -405,7 +406,12 @@ export function AppShell({
 
           {/* Bottom: Settings + school card */}
           <div className="flex flex-col gap-3">
-            <button className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium text-[#6B6B6B] hover:bg-[#F5F5F5] hover:text-[#111]">
+            <button 
+              onClick={() => {
+                if (isLoaded && userId) openUserProfile();
+              }}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13.5px] font-medium text-[#6B6B6B] hover:bg-[#F5F5F5] hover:text-[#111]"
+            >
               <IconSettings />
               Settings
             </button>

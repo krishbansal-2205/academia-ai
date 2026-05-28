@@ -16,6 +16,7 @@ interface AssignmentsState {
   upsertAssignment: (assignment: Assignment) => void;
   deleteAssignment: (id: string) => Promise<void>;
   clearError: () => void;
+  clearAssignments: () => void;
 }
 
 function mergeAssignmentList(assignments: Assignment[], nextAssignment: Assignment): Assignment[] {
@@ -85,4 +86,5 @@ export const useAssignmentsStore = create<AssignmentsState>((set) => ({
     }
   },
   clearError: () => set({ error: null }),
+  clearAssignments: () => set({ assignments: [], currentAssignment: null, error: null }),
 }));
