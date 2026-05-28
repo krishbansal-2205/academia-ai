@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { startTransition, useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { createAssignment } from '../../lib/api';
 import { QUESTION_TYPE_OPTIONS } from '../../lib/types';
 import { useAssignmentBuilderStore } from '../../stores/use-assignment-builder-store';
@@ -81,7 +82,11 @@ export function CreateAssignmentPage() {
         reset();
         startTransition(() => { router.push(`/assignments/${assignment.id}`); });
       } catch (error) {
-        setSubmitError(error instanceof Error ? error.message : 'Failed to create assignment');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to create assignment';
+        setSubmitError(errorMessage);
+        if (errorMessage.toLowerCase().includes('rate limit')) {
+          toast.error(errorMessage);
+        }
       }
     });
   }

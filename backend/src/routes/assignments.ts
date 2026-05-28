@@ -16,6 +16,7 @@ import { addGenerationJob } from '../queues/generationQueue';
 import { addPdfJob } from '../queues/pdfQueue';
 import { cacheAssignment, cacheAssignmentList, getCachedAssignment, getCachedAssignmentList, invalidateAssignmentCache, setJobState } from '../services/assignmentCache';
 import { serializeAssignment } from '../services/assignmentSerializer';
+import { generationRateLimiter } from '../middleware/rateLimiter';
 import { CreateAssignmentBody, IQuestionTypeConfig } from '../types';
 
 const router = Router();
@@ -149,7 +150,7 @@ function routeParam(value: string | string[]): string {
   return Array.isArray(value) ? value[0] : value;
 }
 
-router.post('/', upload.single('file'), async (req: Request, res: Response): Promise<void> => {
+router.post('/', generationRateLimiter, upload.single('file'), async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body as CreateAssignmentBody;
     const parsedQuestionTypes = parseQuestionTypes(body.questionTypes);

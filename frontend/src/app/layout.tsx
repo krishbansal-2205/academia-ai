@@ -1,4 +1,5 @@
 import { ClerkProvider } from '@clerk/nextjs';
+import { Toaster } from 'sonner';
 import type { Metadata } from 'next';
 import './globals.css';
 
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       </head>
       <body className="min-h-full" style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" }}>
         <ClerkProvider>
+          <Toaster richColors position="top-right" />
           {children}
         </ClerkProvider>
       </body>
