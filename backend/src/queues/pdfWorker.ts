@@ -37,8 +37,8 @@ async function processPdfJob(job: Job<PdfJobData>): Promise<void> {
   await assignment.save();
 
   let response = serializeAssignment(assignment);
-  await cacheAssignment(response);
-  await invalidateAssignmentCache(assignmentId);
+  await cacheAssignment(response, assignment.userId);
+  await invalidateAssignmentCache(assignmentId, assignment.userId);
   await setJobState({
     assignmentId,
     status: assignment.status,
@@ -53,8 +53,8 @@ async function processPdfJob(job: Job<PdfJobData>): Promise<void> {
     await assignment.save();
 
     response = serializeAssignment(assignment);
-    await cacheAssignment(response);
-    await invalidateAssignmentCache(assignmentId);
+    await cacheAssignment(response, assignment.userId);
+    await invalidateAssignmentCache(assignmentId, assignment.userId);
     await setJobState({
       assignmentId,
       status: assignment.status,
@@ -67,8 +67,8 @@ async function processPdfJob(job: Job<PdfJobData>): Promise<void> {
     await assignment.save();
 
     response = serializeAssignment(assignment);
-    await cacheAssignment(response);
-    await invalidateAssignmentCache(assignmentId);
+    await cacheAssignment(response, assignment.userId);
+    await invalidateAssignmentCache(assignmentId, assignment.userId);
     await setJobState({
       assignmentId,
       status: assignment.status,

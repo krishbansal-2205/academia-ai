@@ -3,8 +3,15 @@ import path from 'path';
 import pdfParse from 'pdf-parse';
 import multer from 'multer';
 import { Request, Response, Router } from 'express';
+import { ClerkExpressRequireAuth, StrictAuthProp } from '@clerk/clerk-sdk-node';
 import { z } from 'zod';
 import Assignment from '../models/Assignment';
+
+declare global {
+  namespace Express {
+    interface Request extends StrictAuthProp {}
+  }
+}
 import { addGenerationJob } from '../queues/generationQueue';
 import { addPdfJob } from '../queues/pdfQueue';
 import { cacheAssignment, cacheAssignmentList, getCachedAssignment, getCachedAssignmentList, invalidateAssignmentCache, setJobState } from '../services/assignmentCache';
@@ -12,6 +19,7 @@ import { serializeAssignment } from '../services/assignmentSerializer';
 import { CreateAssignmentBody, IQuestionTypeConfig } from '../types';
 
 const router = Router();
+router.use(ClerkExpressRequireAuth() as any);
 const uploadsDir = path.resolve(__dirname, '..', '..', 'uploads');
 
 if (!fs.existsSync(uploadsDir)) {
@@ -127,8 +135,8 @@ function sumQuestionTypes(questionTypes: IQuestionTypeConfig[]): { totalQuestion
   );
 }
 
-async function fetchAssignmentOr404(id: string, response: Response) {
-  const assignment = await Assignment.findById(id);
+async function fetchAssignmentOr404(id: string, userId: string, response: Response) {
+  const assignment = await Assignment.findOne({ _id: id, userId });
   if (!assignment) {
     response.status(404).json({ error: 'Assignment not found' });
     return null;
@@ -177,6 +185,7 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
     );
 
     const assignment = await Assignment.create({
+      userId: req.auth.userId,
       title,
       subject,
       dueDate: validatedPayload.dueDate,
@@ -195,8 +204,8 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
     await addGenerationJob(assignment._id.toString());
 
     const serializedAssignment = serializeAssignment(assignment);
-    await cacheAssignment(serializedAssignment);
-    await invalidateAssignmentCache(serializedAssignment.id);
+    await cacheAssignment(serializedAssignment, req.auth.userId);
+    await invalidateAssignmentCache(serializedAssignment.id, req.auth.userId);
     await setJobState({
       assignmentId: serializedAssignment.id,
       status: serializedAssignment.status,
@@ -225,9 +234,9 @@ router.post('/', upload.single('file'), async (req: Request, res: Response): Pro
   }
 });
 
-router.get('/', async (_req: Request, res: Response): Promise<void> => {
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const cachedAssignments = await getCachedAssignmentList();
+    const cachedAssignments = await getCachedAssignmentList(req.auth.userId);
     if (cachedAssignments) {
       res.json({
         success: true,
@@ -237,10 +246,10 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const assignments = await Assignment.find().sort({ createdAt: -1 });
+    const assignments = await Assignment.find({ userId: req.auth.userId }).sort({ createdAt: -1 });
     const data = assignments.map((assignment) => serializeAssignment(assignment));
 
-    await cacheAssignmentList(data);
+    await cacheAssignmentList(data, req.auth.userId);
     res.json({
       success: true,
       data,
@@ -257,7 +266,7 @@ router.get('/', async (_req: Request, res: Response): Promise<void> => {
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const assignmentId = routeParam(req.params.id);
-    const cachedAssignment = await getCachedAssignment(assignmentId);
+    const cachedAssignment = await getCachedAssignment(assignmentId, req.auth.userId);
     if (cachedAssignment) {
       res.json({
         success: true,
@@ -266,13 +275,13 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const assignment = await fetchAssignmentOr404(assignmentId, res);
+    const assignment = await fetchAssignmentOr404(assignmentId, req.auth.userId, res);
     if (!assignment) {
       return;
     }
 
     const data = serializeAssignment(assignment);
-    await cacheAssignment(data);
+    await cacheAssignment(data, req.auth.userId);
     res.json({
       success: true,
       data,
@@ -288,7 +297,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
 router.post('/:id/regenerate', async (req: Request, res: Response): Promise<void> => {
   try {
     const assignmentId = routeParam(req.params.id);
-    const assignment = await fetchAssignmentOr404(assignmentId, res);
+    const assignment = await fetchAssignmentOr404(assignmentId, req.auth.userId, res);
     if (!assignment) {
       return;
     }
@@ -302,8 +311,8 @@ router.post('/:id/regenerate', async (req: Request, res: Response): Promise<void
     await addGenerationJob(assignment._id.toString());
 
     const serializedAssignment = serializeAssignment(assignment);
-    await cacheAssignment(serializedAssignment);
-    await invalidateAssignmentCache(serializedAssignment.id);
+    await cacheAssignment(serializedAssignment, req.auth.userId);
+    await invalidateAssignmentCache(serializedAssignment.id, req.auth.userId);
     await setJobState({
       assignmentId: serializedAssignment.id,
       status: serializedAssignment.status,
@@ -326,7 +335,7 @@ router.post('/:id/regenerate', async (req: Request, res: Response): Promise<void
 router.post('/:id/pdf', async (req: Request, res: Response): Promise<void> => {
   try {
     const assignmentId = routeParam(req.params.id);
-    const assignment = await fetchAssignmentOr404(assignmentId, res);
+    const assignment = await fetchAssignmentOr404(assignmentId, req.auth.userId, res);
     if (!assignment) {
       return;
     }
@@ -343,8 +352,8 @@ router.post('/:id/pdf', async (req: Request, res: Response): Promise<void> => {
     await addPdfJob(assignment._id.toString());
 
     const serializedAssignment = serializeAssignment(assignment);
-    await cacheAssignment(serializedAssignment);
-    await invalidateAssignmentCache(serializedAssignment.id);
+    await cacheAssignment(serializedAssignment, req.auth.userId);
+    await invalidateAssignmentCache(serializedAssignment.id, req.auth.userId);
     await setJobState({
       assignmentId: serializedAssignment.id,
       status: serializedAssignment.status,
@@ -367,7 +376,7 @@ router.post('/:id/pdf', async (req: Request, res: Response): Promise<void> => {
 router.get('/:id/pdf/download', async (req: Request, res: Response): Promise<void> => {
   try {
     const assignmentId = routeParam(req.params.id);
-    const assignment = await fetchAssignmentOr404(assignmentId, res);
+    const assignment = await fetchAssignmentOr404(assignmentId, req.auth.userId, res);
     if (!assignment) {
       return;
     }
@@ -391,7 +400,7 @@ router.get('/:id/pdf/download', async (req: Request, res: Response): Promise<voi
 router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const assignmentId = routeParam(req.params.id);
-    const assignment = await fetchAssignmentOr404(assignmentId, res);
+    const assignment = await fetchAssignmentOr404(assignmentId, req.auth.userId, res);
     if (!assignment) {
       return;
     }
@@ -411,7 +420,7 @@ router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
     }
 
     await Assignment.findByIdAndDelete(assignmentId);
-    await invalidateAssignmentCache(assignmentId);
+    await invalidateAssignmentCache(assignmentId, req.auth.userId);
 
     res.status(200).json({ success: true });
   } catch (error) {

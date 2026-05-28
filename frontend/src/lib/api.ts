@@ -1,12 +1,37 @@
 import type { ApiListResponse, ApiSuccessResponse, Assignment } from './types';
 
+declare global {
+  interface Window {
+    Clerk?: {
+      session?: {
+        getToken: () => Promise<string | null>;
+      };
+    };
+  }
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  if (typeof window !== 'undefined' && window.Clerk && window.Clerk.session) {
+    try {
+      const token = await window.Clerk.session.getToken();
+      if (token) {
+        return { Authorization: `Bearer ${token}` };
+      }
+    } catch (err) {
+      console.error("Failed to get Clerk token:", err);
+    }
+  }
+  return {};
+}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(await getAuthHeaders()),
       ...options.headers,
     },
   });
@@ -29,6 +54,7 @@ async function requestVoid(path: string, options: RequestInit = {}): Promise<voi
     ...options,
     headers: {
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      ...(await getAuthHeaders()),
       ...options.headers,
     },
   });

@@ -2,6 +2,7 @@
 
 import React, { type ReactNode } from 'react';
 import Link from 'next/link';
+import { useAuth, SignInButton, UserButton } from '@clerk/nextjs';
 
 export type NavKey = 'home' | 'groups' | 'assignments' | 'toolkit' | 'library';
 
@@ -276,6 +277,8 @@ function MobileTabBar({ activeNav }: { activeNav: NavKey }) {
    Mobile: top brand header
 ───────────────────────────────────────── */
 function MobileHeader() {
+  const { isLoaded, userId } = useAuth();
+
   return (
     <div className="p-3 pb-0 lg:hidden print:hidden">
       <header className="flex items-center justify-between rounded-[24px] bg-white px-4 py-3 shadow-sm">
@@ -283,11 +286,14 @@ function MobileHeader() {
           <AppIcon />
           <span className="text-[18px] font-bold tracking-tight text-[#111]">VedaAI</span>
         </div>
-      <div className="flex items-center gap-2">
-        <BellButton />
-        <div className="h-8 w-8 overflow-hidden rounded-full bg-[#E0D6F0]">
-          <div className="flex h-full w-full items-center justify-center text-[11px] font-bold text-[#6B4E9E]">JD</div>
-        </div>
+        <div className="flex items-center gap-2">
+          <BellButton />
+          {isLoaded && userId && <UserButton />}
+          {isLoaded && !userId && (
+            <SignInButton mode="modal">
+              <button className="rounded-full bg-[#111] px-3 py-1.5 text-[11px] font-bold text-white">Sign In</button>
+            </SignInButton>
+          )}
           {/* Hamburger */}
           <button className="flex h-9 w-9 items-center justify-center">
             <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
@@ -336,6 +342,8 @@ export function AppShell({
   backHref = '/',
   children,
 }: AppShellProps) {
+  const { isLoaded, userId } = useAuth();
+
   return (
     <div className="flex h-screen w-full flex-col bg-[#EBEBEB] overflow-hidden print:h-auto print:bg-white print:overflow-visible">
 
@@ -435,16 +443,16 @@ export function AppShell({
             </div>
             <div className="flex items-center gap-3">
               <BellButton />
-              {/* User pill */}
-              <button className="flex items-center gap-2 rounded-full border border-[#E8E8E8] bg-white px-3 py-1.5 transition hover:bg-[#F5F5F5]">
-                <div className="h-6 w-6 overflow-hidden rounded-full bg-[#E0D6F0]">
-                  <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-[#6B4E9E]">JD</div>
-                </div>
-                <span className="text-[13px] font-semibold text-[#111]">John Doe</span>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 9l6 6 6-6" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              {isLoaded && userId && (
+                <UserButton appearance={{ elements: { userButtonBox: "flex-row-reverse" } }} />
+              )}
+              {isLoaded && !userId && (
+                <SignInButton mode="modal">
+                  <button className="rounded-full bg-[#111] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#333]">
+                    Sign In
+                  </button>
+                </SignInButton>
+              )}
             </div>
           </div>
 

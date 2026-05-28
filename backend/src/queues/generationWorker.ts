@@ -29,8 +29,8 @@ async function persistAndBroadcast(assignmentId: string, message?: string): Prom
   }
 
   const response = serializeAssignment(assignment);
-  await cacheAssignment(response);
-  await invalidateAssignmentCache(assignmentId);
+  await cacheAssignment(response, assignment.userId);
+  await invalidateAssignmentCache(assignmentId, assignment.userId);
   await setJobState({
     assignmentId,
     status: assignment.status,

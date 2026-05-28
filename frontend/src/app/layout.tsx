@@ -1,3 +1,4 @@
+import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import './globals.css';
 
@@ -18,7 +19,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         />
       </head>
       <body className="min-h-full" style={{ fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" }}>
-        {children}
+        <ClerkProvider>
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   );

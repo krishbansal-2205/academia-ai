@@ -40,6 +40,7 @@ export interface IGeneratedPaper {
 }
 
 export interface IAssignment {
+  userId: string;
   title: string;
   subject: string;
   dueDate: Date;
@@ -101,6 +102,7 @@ export interface ApiListResponse<T> {
 export interface WSSubscribeMessage {
   type: 'subscribe';
   assignmentId: string;
+  token?: string;
 }
 
 export interface WSSubscribedMessage {

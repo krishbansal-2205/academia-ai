@@ -36,11 +36,15 @@ export const useGenerationSocketStore = create<SocketState>((set, get) => ({
     const socket = new WebSocket(WS_URL);
     set({ socket, connectionState: 'connecting' });
 
-    socket.onopen = () => {
+    socket.onopen = async () => {
       set({ connectionState: 'connected' });
       const { pendingAssignmentId } = get();
       if (pendingAssignmentId) {
-        socket.send(JSON.stringify({ type: 'subscribe', assignmentId: pendingAssignmentId }));
+        let token = null;
+        if (typeof window !== 'undefined' && window.Clerk?.session) {
+          token = await window.Clerk.session.getToken();
+        }
+        socket.send(JSON.stringify({ type: 'subscribe', assignmentId: pendingAssignmentId, token }));
         set({ activeAssignmentId: pendingAssignmentId });
       }
     };
@@ -75,12 +79,16 @@ export const useGenerationSocketStore = create<SocketState>((set, get) => ({
       lastMessage: null,
     });
   },
-  subscribe: (assignmentId: string) => {
+  subscribe: async (assignmentId: string) => {
     const socket = get().socket;
     set({ pendingAssignmentId: assignmentId });
 
     if (socket?.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: 'subscribe', assignmentId }));
+      let token = null;
+      if (typeof window !== 'undefined' && window.Clerk?.session) {
+        token = await window.Clerk.session.getToken();
+      }
+      socket.send(JSON.stringify({ type: 'subscribe', assignmentId, token }));
       set({ activeAssignmentId: assignmentId });
       return;
     }

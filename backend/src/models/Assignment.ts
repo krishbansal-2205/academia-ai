@@ -61,6 +61,7 @@ const QuestionTypeConfigSchema = new Schema(
 
 const AssignmentSchema = new Schema<IAssignmentDocument>(
   {
+    userId: { type: String, required: true, index: true },
     title: { type: String, required: true, trim: true },
     subject: { type: String, required: true, trim: true },
     dueDate: { type: Date, required: true },

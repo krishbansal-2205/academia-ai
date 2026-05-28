@@ -4,6 +4,7 @@ import Assignment from '../models/Assignment';
 import { WSIncomingMessage, WSOutgoingMessage, AssignmentResponse } from '../types';
 import { serializeAssignment } from '../services/assignmentSerializer';
 import { getCachedAssignment, getJobState } from '../services/assignmentCache';
+import { verifyToken } from '@clerk/clerk-sdk-node';
 
 const subscriptions = new Map<string, Set<WebSocket>>();
 
@@ -15,8 +16,8 @@ function sendMessage(ws: WebSocket, message: WSOutgoingMessage): void {
   }
 }
 
-async function sendInitialAssignmentState(ws: WebSocket, assignmentId: string): Promise<void> {
-  const cachedAssignment = await getCachedAssignment(assignmentId);
+async function sendInitialAssignmentState(ws: WebSocket, assignmentId: string, userId: string): Promise<void> {
+  const cachedAssignment = await getCachedAssignment(assignmentId, userId);
 
   if (cachedAssignment) {
     sendMessage(ws, {
@@ -28,7 +29,7 @@ async function sendInitialAssignmentState(ws: WebSocket, assignmentId: string): 
     return;
   }
 
-  const assignment = await Assignment.findById(assignmentId);
+  const assignment = await Assignment.findOne({ _id: assignmentId, userId });
   if (assignment) {
     sendMessage(ws, {
       type: 'assignment:update',
@@ -53,17 +54,27 @@ export function initWebSocket(server: HTTPServer): WebSocketServer {
       try {
         const message: WSIncomingMessage = JSON.parse(raw.toString());
 
-        if (message.type === 'subscribe' && message.assignmentId) {
-          if (!subscriptions.has(message.assignmentId)) {
-            subscriptions.set(message.assignmentId, new Set());
-          }
+        if (message.type === 'subscribe' && message.assignmentId && message.token) {
+          try {
+            const jwt = await verifyToken(message.token, {
+              secretKey: process.env.CLERK_SECRET_KEY,
+            } as any);
+            const userId = jwt.sub;
 
-          subscriptions.get(message.assignmentId)?.add(ws);
-          sendMessage(ws, {
-            type: 'subscribed',
-            assignmentId: message.assignmentId,
-          });
-          await sendInitialAssignmentState(ws, message.assignmentId);
+            if (!subscriptions.has(message.assignmentId)) {
+              subscriptions.set(message.assignmentId, new Set());
+            }
+
+            subscriptions.get(message.assignmentId)?.add(ws);
+            sendMessage(ws, {
+              type: 'subscribed',
+              assignmentId: message.assignmentId,
+            });
+            await sendInitialAssignmentState(ws, message.assignmentId, userId);
+          } catch (err) {
+            console.error('Invalid token for WS subscribe', err);
+            ws.close();
+          }
         }
       } catch (error) {
         console.error('Invalid WebSocket message:', (error as Error).message);

@@ -3,39 +3,42 @@ import { getRedisClient } from '../config/redis';
 
 const ASSIGNMENT_TTL_SECONDS = 60 * 30;
 const JOB_STATE_TTL_SECONDS = 60 * 60 * 6;
-const ASSIGNMENT_LIST_KEY = 'assignments:list';
 
-function assignmentKey(id: string): string {
-  return `assignment:${id}`;
+function assignmentListKey(userId: string): string {
+  return `assignments:list:${userId}`;
+}
+
+function assignmentKey(id: string, userId: string): string {
+  return `assignment:${userId}:${id}`;
 }
 
 function jobStateKey(id: string): string {
   return `assignment:${id}:job-state`;
 }
 
-export async function getCachedAssignment(id: string): Promise<AssignmentResponse | null> {
-  const cached = await getRedisClient().get(assignmentKey(id));
+export async function getCachedAssignment(id: string, userId: string): Promise<AssignmentResponse | null> {
+  const cached = await getRedisClient().get(assignmentKey(id, userId));
   return cached ? (JSON.parse(cached) as AssignmentResponse) : null;
 }
 
-export async function cacheAssignment(assignment: AssignmentResponse): Promise<void> {
+export async function cacheAssignment(assignment: AssignmentResponse, userId: string): Promise<void> {
   const client = getRedisClient();
-  await client.setex(assignmentKey(assignment.id), ASSIGNMENT_TTL_SECONDS, JSON.stringify(assignment));
+  await client.setex(assignmentKey(assignment.id, userId), ASSIGNMENT_TTL_SECONDS, JSON.stringify(assignment));
 }
 
-export async function invalidateAssignmentCache(id: string): Promise<void> {
+export async function invalidateAssignmentCache(id: string, userId: string): Promise<void> {
   const client = getRedisClient();
-  await client.del(assignmentKey(id), ASSIGNMENT_LIST_KEY);
+  await client.del(assignmentKey(id, userId), assignmentListKey(userId));
 }
 
-export async function getCachedAssignmentList(): Promise<AssignmentResponse[] | null> {
-  const cached = await getRedisClient().get(ASSIGNMENT_LIST_KEY);
+export async function getCachedAssignmentList(userId: string): Promise<AssignmentResponse[] | null> {
+  const cached = await getRedisClient().get(assignmentListKey(userId));
   return cached ? (JSON.parse(cached) as AssignmentResponse[]) : null;
 }
 
-export async function cacheAssignmentList(assignments: AssignmentResponse[]): Promise<void> {
+export async function cacheAssignmentList(assignments: AssignmentResponse[], userId: string): Promise<void> {
   await getRedisClient().setex(
-    ASSIGNMENT_LIST_KEY,
+    assignmentListKey(userId),
     ASSIGNMENT_TTL_SECONDS,
     JSON.stringify(assignments)
   );
