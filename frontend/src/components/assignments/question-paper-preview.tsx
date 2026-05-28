@@ -111,7 +111,7 @@ export function QuestionPaperPreview({
                     <div className="mt-2 grid grid-cols-1 gap-1 pl-5 sm:grid-cols-2">
                       {question.options.map((option, idx) => (
                         <span key={option} className="text-[13px] text-[#444]">
-                          ({String.fromCharCode(97 + idx)}) {option}
+                          ({String.fromCharCode(97 + idx)}) {option.replace(/^(?:Option\s+)?(?:[A-Za-z0-9][.)\-:]|\([A-Za-z0-9]\))\s*/i, '')}
                         </span>
                       ))}
                     </div>
